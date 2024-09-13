@@ -1,6 +1,6 @@
 # Embedding an Ethical Mind:<br/>Aligning Text-to-Image Synthesis via Lightweight Value Optimization
 
-The official implementation of ACM Multimedia 2024 accepted paper "Embedding an Ethical Mind: Aligning Text-to-Image Synthesis via Lightweight Value Optimization"
+The official implementation of ACM Multimedia 2024 accepted paper "Embedding an Ethical Mind: Aligning Text-to-Image Synthesis via Lightweight Value Optimization".
 
 <div align=center>
 <img src="assets/framework.png" width="100%"/>  
@@ -34,6 +34,7 @@ conda activate livo
 conda install pytorch==2.2.0 torchvision==0.17.0 pytorch-cuda=12.1 -c pytorch -c nvidia -y
 conda install accelerate datasets transformers diffusers -c conda-forge -y
 pip install torchmetrics[image] openai tiktoken
+pip install wandb xformers==0.0.24 # optional
 ```
 
 ## Inference
@@ -87,15 +88,65 @@ cd value_retriever
 python retriever.py
 ```
 
+**Note:** Please kindly note that besides our implementation of the value retriever, which is a simple combination of keyword matching and LLM reasoning, there are more possible approaches such as language model finetuning, as long as they fit the formulation of value retriever in the Section 3.2 of our paper. 
+
 ## Training the Value Encoder
+
+The training script of the value encoder is provided at [value_encoder/train.py](value_encoder/train.py). To train the value encoder, we need to prepare a text-image preference dataset as described in Section 3.4 in our paper. As the full training dataset is still under assessment for public release, we currently provide the debias part of the dataset for demonstration training, and you can download it from [here](https://drive.google.com/file/d/1vqk294MhmT1b0YsWAO5BMLtF42qnMuYH/view?usp=sharing) (MD5: dadca2632564c78626ca619d63d7c9ee).
+
+After downloading the archive file, which should be named as `livo_data_debias.tar.gz`, move it to the root of this repository and extract the dataset:
+
+```shell
+cd your/local/path/to/LiVO
+mv download/path/to/livo_data_debias.tar.gz ./
+tar -xzvf livo_data_debias.tar.gz
+```
+You should get a directory under the root named `livo_data`, which contains 3 subfolders: `0-career`, `1-goodness`, `2-badness`. Then you could train the value encoder using the following script:
+
+```shell
+cd value_encoder
+
+export TRAIN_NAME="livo_bs8_lr1e-6_b1000_a500_g11_g205"
+export MODEL_NAME="stable-diffusion-v1-5/stable-diffusion-v1-5"
+export TRAIN_DIR="../livo_data"
+export OUTPUT_DIR="../training_runs"
+
+accelerate launch train.py \
+  --pretrained_model_name_or_path=$MODEL_NAME \
+  --train_data_dir=$TRAIN_DIR \
+  --validation_prompts "gender equality, a photo of a doctor" "nudity considered inappropriate, a photo of a naked woman" \
+  --num_images_per_val_prompt=8 \
+  --name=${TRAIN_NAME} \
+  --output_dir=${OUTPUT_DIR}/${TRAIN_NAME} \
+  --resolution=512 --center_crop --random_flip \
+  --train_batch_size=8 \
+  --max_train_steps=15000 \
+  --gradient_accumulation_steps=1 \
+  --gradient_checkpointing \
+  --learning_rate=1e-6 \
+  --lr_scheduler="constant" \
+  --lr_warmup_steps=1000 \
+  --livo_beta=1000 \
+  --livo_alpha=500 \
+  --livo_gamma_1=1 \
+  --livo_gamma_2=0.5 \
+  --max_grad_norm=1 \
+  --mixed_precision="fp16" \
+  --report_to="wandb" \
+  --checkpointing_steps=1000 \
+  --checkpoints_total_limit=20 \
+  --enable_xformers_memory_efficient_attention \
+  --validation_steps=1000 \
+  --tracker_project_name="livo"
+```
 
 ## Evaluation
 
 ## TODO
 
-- [ ] Value encoder implementation
+- [x] Value encoder implementation
   - [x] inference
-  - [ ] training
+  - [x] training
 - [x] Value retriever implementation
 - [x] Checkpoints for value encoder
 - [ ] Evaluation code
