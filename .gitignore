@@ -1,7 +1,7 @@
 __pycache__/
 value_encoder/*.png
 livo_data/
-livo_eval/
+livo_eval_data/
 training_runs/
 
 *.tar.gz

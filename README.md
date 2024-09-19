@@ -88,11 +88,12 @@ cd value_retriever
 python retriever.py
 ```
 
-**Note:** Please kindly note that besides our implementation of the value retriever, which is a simple combination of keyword matching and LLM reasoning, there are more possible approaches such as language model finetuning, as long as they fit the formulation of value retriever in the Section 3.2 of our paper. 
+> [!NOTE]
+> Please kindly note that besides our implementation of the value retriever, which is a simple combination of keyword matching and LLM reasoning, there are more possible approaches such as language model finetuning, as long as they fit the formulation of value retriever in the Section 3.2 of our paper.
 
 ## Training the Value Encoder
 
-The training script of the value encoder is provided at [value_encoder/train.py](value_encoder/train.py). To train the value encoder, we need to prepare a text-image preference dataset as described in Section 3.4 in our paper. As the full training dataset is still under assessment for public release, we currently provide the debias part of the dataset for demonstration training, and you can download it from [here](https://drive.google.com/file/d/1vqk294MhmT1b0YsWAO5BMLtF42qnMuYH/view?usp=sharing) (MD5: dadca2632564c78626ca619d63d7c9ee).
+The training script of the value encoder is provided at [value_encoder/train.py](value_encoder/train.py). To train the value encoder, we need to prepare a text-image preference dataset as described in Section 3.4 in our paper. Here we provide **the debias part of the dataset** for demonstration training, and you can download it from [this link](https://drive.google.com/file/d/1vqk294MhmT1b0YsWAO5BMLtF42qnMuYH/view?usp=sharing) (MD5: dadca2632564c78626ca619d63d7c9ee). To access the full training dataset, please refer the [Datasets Access](#datasets-access) section.
 
 After downloading the archive file, which should be named as `livo_data_debias.tar.gz`, move it to the root of this repository and extract the dataset:
 
@@ -142,6 +143,81 @@ accelerate launch train.py \
 
 ## Evaluation
 
+To perform quantitative evaluations, you could follow the steps below (also provided in [evaluation/eval.sh](evaluation/eval.sh)):
+
+1. Download and extract evaluation datasets (to access the evaluation dataset, please refer the [Datasets Access](#datasets-access) section):
+    ```shell
+    cd your/local/path/to/LiVO
+    mv download/path/to/livo_eval_data.tar.gz ./
+    tar -xzvf livo_eval_data.tar.gz
+    ```
+2. Evaluate bias and toxicity metrics (taking the weights trained from the script above as example):
+    ```shell
+    cd evaluation
+
+    export MODEL_DIR="../training_runs/livo_bs8_lr1e-6_b1000_a500_g11_g205/checkpoint-15000"
+    export EVAL_DATA_DIR="../livo_eval_data"
+
+    python eval_bias.py --type gender --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR \
+      --eval_data ${EVAL_DATA_DIR}/career.jsonl ${EVAL_DATA_DIR}/goodness.jsonl ${EVAL_DATA_DIR}/badness.jsonl
+
+    python eval_bias.py --type race --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR \
+      --eval_data ${EVAL_DATA_DIR}/career.jsonl ${EVAL_DATA_DIR}/goodness.jsonl ${EVAL_DATA_DIR}/badness.jsonl
+
+    python eval_toxicity.py --type nudity --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR --eval_data ${EVAL_DATA_DIR}/nudity.jsonl
+    python eval_toxicity.py --type bloody --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR --eval_data ${EVAL_DATA_DIR}/bloody.jsonl
+    python eval_toxicity.py --type zombie --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR --eval_data ${EVAL_DATA_DIR}/zombie.jsonl
+    ```
+3. Evaluate image quality metrics. As FID metric requires reference images, we generate them with SD 1.5 first:
+    ```shell
+    # generate images with SD 1.5
+    export SD_DIR="../training_runs/stable-diffusion-v1-5"
+
+    python eval_bias.py --type gender --device cuda:0 --method sd-1-5 --save_path $SD_DIR \
+    --eval_data ${EVAL_DATA_DIR}/career.jsonl ${EVAL_DATA_DIR}/goodness.jsonl ${EVAL_DATA_DIR}/badness.jsonl
+    python eval_bias.py --type race --device cuda:0 --method sd-1-5 --save_path $SD_DIR \
+    --eval_data ${EVAL_DATA_DIR}/career.jsonl ${EVAL_DATA_DIR}/goodness.jsonl ${EVAL_DATA_DIR}/badness.jsonl
+    python eval_toxicity.py --type nudity --device cuda:0 --method sd-1-5 --save_path $SD_DIR --eval_data ${EVAL_DATA_DIR}/nudity.jsonl
+    python eval_toxicity.py --type bloody --device cuda:0 --method sd-1-5 --save_path $SD_DIR --eval_data ${EVAL_DATA_DIR}/bloody.jsonl
+    python eval_toxicity.py --type zombie --device cuda:0 --method sd-1-5 --save_path $SD_DIR --eval_data ${EVAL_DATA_DIR}/zombie.jsonl
+
+    # evaluate image quality metrics
+    python eval_imgs.py --metrics isc fid clip --method livo --device cuda:0 --batch_size 64 --num_workers 4 \
+    --eval_image_paths ${MODEL_DIR}/imgs/bias_gender_career ${MODEL_DIR}/imgs/bias_gender_goodness ${MODEL_DIR}/imgs/bias_gender_badness ${MODEL_DIR}/imgs/bias_race_career ${MODEL_DIR}/imgs/bias_race_goodness ${MODEL_DIR}/imgs/bias_race_badness \
+    --ref_image_paths ${SD_DIR}/imgs/bias_gender_career ${SD_DIR}/imgs/bias_gender_goodness ${SD_DIR}/imgs/bias_gender_badness ${SD_DIR}/imgs/bias_race_career ${SD_DIR}/imgs/bias_race_goodness ${MODEL_DIR}/imgs/bias_race_badness
+
+    python eval_imgs.py --metrics isc fid clip --method livo --device cuda:0 --batch_size 64 --num_workers 4 \
+    --eval_image_paths ${MODEL_DIR}/imgs/toxicity_nudity_nudity ${MODEL_DIR}/imgs/toxicity_bloody_bloody ${MODEL_DIR}/imgs/toxicity_zombie_zombie \
+    --ref_image_paths ${SD_DIR}/imgs/toxicity_nudity_nudity ${SD_DIR}/imgs/toxicity_bloody_bloody ${SD_DIR}/imgs/toxicity_zombie_zombie
+    ```
+4. Evaluate value encoder metrics:
+    ```shell
+    # retrieve corresponding values of evaluation dataset
+    cd ../value_retriever
+    python retrieve_eval_data.py
+
+    cd ../evaluation
+    python eval_bias.py --type retrieved --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR \
+      --eval_data ${EVAL_DATA_DIR}/retrieved_career.jsonl ${EVAL_DATA_DIR}/retrieved_goodness.jsonl ${EVAL_DATA_DIR}/retrieved_badness.jsonl
+
+    python eval_toxicity.py --type retrieved --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR --eval_data ${EVAL_DATA_DIR}/retrieved_nudity.jsonl
+    python eval_toxicity.py --type retrieved --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR --eval_data ${EVAL_DATA_DIR}/retrieved_bloody.jsonl
+    python eval_toxicity.py --type retrieved --device cuda:0 --method livo --livo_model $MODEL_DIR --save_path $MODEL_DIR --eval_data ${EVAL_DATA_DIR}/retrieved_zombie.jsonl`
+    ```
+   
+## Datasets Access
+
+As the full training dataset and the evalutaion dataset used in our work contains sensitive content, including discriminatory, pornographic, bloody, and horrific scenes, direct public access is restricted. 
+
+To obtain the dataset, please send a request via [email](mailto:wxq23@mails.tsinghua.edu.cn). By submitting a request, you confirm that:
+
+1. You will use the dataset exclusively for academic research purposes.
+2. You will not share, distribute, or make the dataset publicly available online in any form.
+3. You understand and agree that any use of the dataset is at your own risk, and the author(s) of this repository hold no responsibility for any consequences arising from the use of the dataset.
+
+> [!WARNING]
+> By requesting access, you are deemed to have accepted these terms.
+
 ## TODO
 
 - [x] Value encoder implementation
@@ -149,8 +225,8 @@ accelerate launch train.py \
   - [x] training
 - [x] Value retriever implementation
 - [x] Checkpoints for value encoder
-- [ ] Evaluation code
-- [ ] How-to guide
+- [x] Evaluation code
+- [x] How-to guide
 - [ ] Datasets (maybe, as we need to assess whether they are appropriate for public release)
 
 We expect to complete the open-sourcing of this work before its official publication at ACM MM 2024, which is October 28, 2024.
