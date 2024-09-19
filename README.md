@@ -13,7 +13,7 @@ Illustration of LiVO.
 
 ## News
 
-[2024-09-18]: The major content of this repository has been fully updated!
+[2024-09-19]: The major content of this repository has been fully updated!
 
 ## Abstract
 
