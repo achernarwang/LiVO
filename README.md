@@ -1,5 +1,7 @@
 # Embedding an Ethical Mind:<br/>Aligning Text-to-Image Synthesis via Lightweight Value Optimization
 
+### Arxiv Paper (coming soon!) | [OpenReview](https://openreview.net/forum?id=loG3nGk7p7)
+
 The official implementation of ACM Multimedia 2024 accepted paper "Embedding an Ethical Mind: Aligning Text-to-Image Synthesis via Lightweight Value Optimization".
 
 <div align=center>
@@ -8,6 +10,10 @@ The official implementation of ACM Multimedia 2024 accepted paper "Embedding an 
 Illustration of LiVO.
 
 </div>
+
+## News
+
+[2024-09-18]: The major content of this repository has been fully updated!
 
 ## Abstract
 
@@ -217,19 +223,6 @@ To obtain the dataset, please send a request via [email](mailto:wxq23@mails.tsin
 
 > [!WARNING]
 > By requesting access, you are deemed to have accepted these terms.
-
-## TODO
-
-- [x] Value encoder implementation
-  - [x] inference
-  - [x] training
-- [x] Value retriever implementation
-- [x] Checkpoints for value encoder
-- [x] Evaluation code
-- [x] How-to guide
-- [ ] Datasets (maybe, as we need to assess whether they are appropriate for public release)
-
-We expect to complete the open-sourcing of this work before its official publication at ACM MM 2024, which is October 28, 2024.
   
 ## Acknowledgements
 
