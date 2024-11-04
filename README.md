@@ -230,3 +230,17 @@ To obtain the dataset, please send a request via [email](mailto:wxq23@mails.tsin
 
 - Thanks to the [🤗 Diffusers](https://github.com/huggingface/diffusers) Library and everyone who ever contributed to it! We built our work upon this great open-source project.
 - Thanks to the authors of [Fair Diffusion](https://github.com/ml-research/Fair-Diffusion), [Concept Ablation](https://github.com/nupurkmr9/concept-ablation), [Unified Concept Editing](https://github.com/rohitgandikota/unified-concept-editing) for their amazing research and the open source of their implementations! We use their implementations as baseline models in our paper.
+
+## Citation
+
+If you feel this repo is helpful to your research, please cite our work.
+
+```
+@inproceedings{wang2024embedding,
+  title={Embedding an Ethical Mind: Aligning Text-to-Image Synthesis via Lightweight Value Optimization},
+  author={Wang, Xingqi and Yi, Xiaoyuan and Xie, Xing and Jia, Jia},
+  booktitle={Proceedings of the 32nd ACM International Conference on Multimedia},
+  pages={3558--3567},
+  year={2024}
+}
+```
