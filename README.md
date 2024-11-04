@@ -1,6 +1,6 @@
 # Embedding an Ethical Mind:<br/>Aligning Text-to-Image Synthesis via Lightweight Value Optimization
 
-### [Arxiv Paper](https://arxiv.org/abs/2410.12700) | [OpenReview](https://openreview.net/forum?id=loG3nGk7p7)
+### [ACM DL](https://dl.acm.org/doi/abs/10.1145/3664647.3681652) | [Arxiv Paper](https://arxiv.org/abs/2410.12700) | [OpenReview](https://openreview.net/forum?id=loG3nGk7p7)
 
 The official implementation of ACM Multimedia 2024 accepted paper "Embedding an Ethical Mind: Aligning Text-to-Image Synthesis via Lightweight Value Optimization".
 
