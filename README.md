@@ -101,7 +101,7 @@ python retriever.py
 
 ## Training the Value Encoder
 
-The training script of the value encoder is provided at [value_encoder/train.py](value_encoder/train.py). To train the value encoder, we need to prepare a text-image preference dataset as described in Section 3.4 in our paper. Here we provide **the debias part of the dataset** for demonstration training, and you can download it from [this link](https://drive.google.com/file/d/1vqk294MhmT1b0YsWAO5BMLtF42qnMuYH/view?usp=sharing) (MD5: dadca2632564c78626ca619d63d7c9ee). To access the full training dataset, please refer the [Datasets Access](#datasets-access) section.
+The training script of the value encoder is provided at [value_encoder/train.py](value_encoder/train.py). To train the value encoder, we need to prepare a text-image preference dataset as described in Section 3.4 in our paper. Here we provide **the debias part of the dataset** for demonstration training, and you can download it from [this link](https://drive.google.com/file/d/1vqk294MhmT1b0YsWAO5BMLtF42qnMuYH/view?usp=sharing) (MD5: dadca2632564c78626ca619d63d7c9ee). To access the full training dataset, please refer to the [Datasets Access](#datasets-access) section.
 
 After downloading the archive file, which should be named as `livo_data_debias.tar.gz`, move it to the root of this repository and extract the dataset:
 
@@ -153,13 +153,13 @@ accelerate launch train.py \
 
 To perform quantitative evaluations, you could follow the steps below (also provided in [evaluation/eval.sh](evaluation/eval.sh)):
 
-1. Download and extract evaluation datasets (to access the evaluation dataset, please refer the [Datasets Access](#datasets-access) section):
+1. Download and extract evaluation datasets (to access the evaluation dataset, please refer to the [Datasets Access](#datasets-access) section):
     ```shell
     cd your/local/path/to/LiVO
     mv download/path/to/livo_eval_data.tar.gz ./
     tar -xzvf livo_eval_data.tar.gz
     ```
-2. Evaluate bias and toxicity metrics (taking the weights trained from the script above as example):
+2. Evaluate bias and toxicity metrics (taking the weights trained from the script above as an example):
     ```shell
     cd evaluation
 
@@ -200,7 +200,7 @@ To perform quantitative evaluations, you could follow the steps below (also prov
     ```
 4. Evaluate value encoder metrics:
     ```shell
-    # retrieve corresponding values of evaluation dataset
+    # retrieve corresponding values of the evaluation dataset
     cd ../value_retriever
     python retrieve_eval_data.py
 
@@ -215,13 +215,13 @@ To perform quantitative evaluations, you could follow the steps below (also prov
    
 ## Datasets Access
 
-As the full training dataset and the evalutaion dataset used in our work contains sensitive content, including discriminatory, pornographic, bloody, and horrific scenes, direct public access is restricted. 
+As the full training dataset and the evaluation dataset used in our work contain sensitive content, including discriminatory, pornographic, bloody, and horrific scenes, direct public access is restricted. 
 
 To obtain the dataset, please send a request via [email](mailto:wxq23@mails.tsinghua.edu.cn). By submitting a request, you confirm that:
 
 1. You will use the dataset exclusively for academic research purposes.
 2. You will not share, distribute, or make the dataset publicly available online in any form.
-3. You understand and agree that any use of the dataset is at your own risk, and the author(s) of this repository hold no responsibility for any consequences arising from the use of the dataset.
+3. You understand and agree that any use of the dataset is at your own risk, and the authors of this repository hold no responsibility for any consequences arising from your use of the dataset.
 
 > [!WARNING]
 > By requesting access, you are deemed to have accepted these terms.
@@ -229,7 +229,7 @@ To obtain the dataset, please send a request via [email](mailto:wxq23@mails.tsin
 ## Acknowledgements
 
 - Thanks to the [🤗 Diffusers](https://github.com/huggingface/diffusers) Library and everyone who ever contributed to it! We built our work upon this great open-source project.
-- Thanks to the authors of [Fair Diffusion](https://github.com/ml-research/Fair-Diffusion), [Concept Ablation](https://github.com/nupurkmr9/concept-ablation), [Unified Concept Editing](https://github.com/rohitgandikota/unified-concept-editing) for their amazing research and the open source of their implementations! We use their implementations as baseline models in our paper.
+- Thanks to the authors of [Fair Diffusion](https://github.com/ml-research/Fair-Diffusion), [Concept Ablation](https://github.com/nupurkmr9/concept-ablation), [Unified Concept Editing](https://github.com/rohitgandikota/unified-concept-editing) for their amazing research and the open-source of their implementations! We use their implementations as baseline models in our paper.
 
 ## Citation
 
